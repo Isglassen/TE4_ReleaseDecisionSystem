@@ -7,7 +7,7 @@
 #ticketList {
 	display: grid;
 	gap: 10px;
-	grid-template-columns: repeat(5, minmax(300px, 1fr));
+	grid-template-columns: repeat(5, auto);
 	width: fit-content;
 }
 
