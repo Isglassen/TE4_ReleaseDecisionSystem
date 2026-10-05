@@ -1,3 +1,5 @@
+import { updateClassification } from "./logic.js";
+
 const BASE_TICKETS = [
 	{ id: 101, title: "Login outage", severity: 5, status: "open", owner: "Ava", remainingHours: 6, customerVip: true, blocked: false },
 	{ id: 102, title: "Export slow", severity: 3, status: "open", owner: "Noah", remainingHours: 4, customerVip: false, blocked: false },
@@ -14,5 +16,5 @@ const BASE_TICKETS = [
 ];
 
 export function loadTickets() {
-	return BASE_TICKETS;
+	return BASE_TICKETS.map(updateClassification);
 }
