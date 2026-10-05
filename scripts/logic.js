@@ -37,4 +37,10 @@ export function releaseStats(tickets) {
 	} else if (workHours > 35 || classifications["UNASSIGNED"] > 0) {
 		decision = "HOLD";
 	}
+
+	return {
+		tickets: classifications,
+		workHours,
+		decision
+	}
 }
