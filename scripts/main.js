@@ -5,14 +5,23 @@ const ticketList = document.getElementById("ticketList");
 const workHours = document.getElementById("workHours");
 const releaseDecision = document.getElementById("decision");
 const idSearchInput = document.getElementById("idSearch");
+const filterSelect = document.getElementById("filterStatus");
 
-const tickets = loadTickets();
-let search = null;
+const state = {
+	search: null,
+	filter: null,
+	tickets: loadTickets(),
+}
 
 function applySearch(tickets, id) {
 	// Matching ticket becomes 1, non matching becomes 0. Sort descending so matching ticket is first.
 	const matchFirst = tickets.toSorted((a, b) => (b.id === id) - (a.id === id))
 	return matchFirst;
+}
+
+function applyFilter(tickets, filter) {
+	if (!filter) return tickets;
+	return tickets.filter(ticket => ticket.classification === filter);
 }
 
 function ticketElement(ticket, highlight = false) {
@@ -48,8 +57,15 @@ function ticketElement(ticket, highlight = false) {
 function render() {
 	ticketList.innerHTML = "";
 
-	// Get the highlighted ticket first of search is not null.
-	const displayTickets = search === null ? tickets : applySearch(tickets, search);
+	const { search, filter } = state;
+
+	// Sort tickets by severity descending.
+	const tickets = state.tickets.toSorted((a, b) => b.severity - a.severity);
+
+	// Get the highlighted ticket first if search is not null.
+	const displayTickets = search === null
+		? applyFilter(tickets, filter)
+		: applySearch(applyFilter(tickets, filter), search);
 
 	displayTickets.forEach(ticket => {
 		// Display ticket, if ticket id is the searched one highlight it.
@@ -73,11 +89,20 @@ function render() {
 function updateSearch(value) {
 	let num = value !== null ? parseInt(value, 10) : null;
 	if (isNaN(num)) num = null;
-	search = num;
+	state.search = num;
+}
+
+function updateFilter(value) {
+	state.filter = value === "" ? null : value;
 }
 
 idSearchInput.addEventListener("input", (event) => {
 	updateSearch(event.target.value);
+	render();
+});
+
+filterSelect.addEventListener("input", (event) => {
+	updateFilter(event.target.value);
 	render();
 });
 

@@ -9,7 +9,6 @@
 	</head>
 	<body>
 		<h1>Release Decision System</h1>
-		<label for="idSearch">Search for ID: <input type="text" id="idSearch"></label>
 		<section>
 			<h2>Release Decision</h2>
 			<p>Blocking tickets: <span id="count_RELEASE_BLOCKER">0</span></p>
@@ -20,6 +19,17 @@
 		</section>
 		<section>
 			<h2>Ticket List</h2>
+			<label for="idSearch">Search for ID: <input type="text" id="idSearch"></label>
+			<label for="filterStatus">Filter by status: 
+				<select id="filterStatus">
+					<option value="">All</option>
+					<option value="RELEASE_BLOCKER">Release Blocker</option>
+					<option value="PRIORITY">Priority</option>
+					<option value="UNASSIGNED">Unassigned</option>
+					<option value="ACTIVE">Active</option>
+					<option value="DONE">Done</option>
+				</select>
+			</label>
 			<div id="ticketList"></div>
 		</section>
 	</body>
