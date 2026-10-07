@@ -11,9 +11,14 @@
 	width: fit-content;
 }
 
-#ticketList article {
+.ticket {
 	display: grid;
 	grid-column: span 5;
 	grid-template-columns: subgrid;
 	border: 1px solid #ccc;
+}
+
+.ticket.highlight {
+	background-color: #f0f8ff;
+	border-color: #1e90ff;
 }
