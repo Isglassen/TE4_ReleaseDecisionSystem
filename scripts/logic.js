@@ -7,8 +7,10 @@ export function calssifyTicket(ticket) {
 	return "ACTIVE";
 }
 
-export function updateClassification(ticket) {
-	return { ...ticket, classification: calssifyTicket(ticket) };
+export function updateClassification(ticket, update = false) {
+	const newTicket = update ? ticket : { ...ticket };
+	newTicket.classification = calssifyTicket(newTicket);
+	return newTicket;
 }
 
 export function releaseStats(tickets) {

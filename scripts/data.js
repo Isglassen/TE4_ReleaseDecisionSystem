@@ -18,3 +18,8 @@ const BASE_TICKETS = [
 export function loadTickets() {
 	return BASE_TICKETS.map(updateClassification);
 }
+
+export function saveTickets(tickets) {
+	console.warn("saveTickets Not implemented")
+	// Remember to strip classicfication property before saving, as it is derived from other properties and should not be stored.
+}

@@ -44,3 +44,4 @@ else => RELEASE
 - [ ] Add tickets. (Save interface as editing?)
 - [ ] Save tickets
 - [X] Filter tickets
+- [ ] Delete tickets
