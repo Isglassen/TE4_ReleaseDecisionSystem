@@ -32,5 +32,28 @@
 			</label>
 			<div id="ticketList"></div>
 		</section>
+		<div class="modal hidden" id="ticketModal">
+			<div class="modal-content">
+				<span class="close" id="closeModal">&times;</span>
+				<h2 id="ticketModalTitle">Edit Ticket</h2>
+				<form id="ticketEdit">
+					<label for="ticketId">Ticket ID: <input type="text" id="ticketId" readonly disabled size="4"></label>
+					<label for="ticketTitle">Title: <input type="text" id="ticketTitle"></label>
+					<label for="ticketSeverity">Severity: <input type="number" id="ticketSeverity" min="1" max="5"></label>
+					<label for="ticketStatus">Status:
+						<select id="ticketStatus">
+							<option value="open">Open</option>
+							<option value="testing">Testing</option>
+							<option value="done">Done</option>
+						</select>
+					</label>
+					<label for="ticketOwner">Owner: <input type="text" id="ticketOwner"></label>
+					<label for="ticketRemainingHours">Remaining Hours: <input type="number" id="ticketRemainingHours" min="0" size="3"></label>
+					<label for="ticketCustomerVip"><input type="checkbox" id="ticketCustomerVip"> VIP Customer</label>
+					<label for="ticketBlocked"><input type="checkbox" id="ticketBlocked"> Blocked</label>
+					<input type="submit" value="Save Changes">
+				</form>
+			</div>
+		</div>
 	</body>
 </html>
