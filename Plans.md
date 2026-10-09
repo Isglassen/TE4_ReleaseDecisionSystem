@@ -42,6 +42,6 @@ else => RELEASE
 - [X] Search for ticket by id
 - [X] Open ticket details. Possibly editing them.
 - [X] Add tickets. (Save interface as editing?)
-- [ ] Save tickets
+- [X] Save tickets
 - [X] Filter tickets
-- [ ] Delete tickets
+- [X] Delete tickets

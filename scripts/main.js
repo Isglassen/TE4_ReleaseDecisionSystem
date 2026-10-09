@@ -22,6 +22,7 @@ const formElements = {
 	blockedInput: document.getElementById("ticketBlocked"),
 	saveButton: document.getElementById("ticketSave"),
 	error: document.getElementById("ticketError"),
+	deleteButton: document.getElementById("ticketDelete"),
 }
 
 const state = {
@@ -178,6 +179,12 @@ function render() {
 	releaseDecision.textContent = stats.decision;
 }
 
+function deleteTicket(id) {
+	const index = state.tickets.findIndex(t => t.id === id);
+	state.tickets.splice(index, 1);
+	saveTickets(state.tickets);
+}
+
 // This function handles both strings, numbers and null.
 // Strings get converted to numbers, or null if NaN.
 function updateSearch(value) {
@@ -207,6 +214,7 @@ formElements.close.addEventListener("click", () => {
 
 formElements.form.addEventListener("submit", (event) => {
 	event.preventDefault();
+	if (!state.showingTicket.id) return; // Can't save if no ticket is being shown.
 	saveTicket();
 	render();
 });
@@ -225,4 +233,12 @@ addTicketButton.addEventListener("click", () => {
 	displayTicket(null);
 });
 
-render()
+formElements.deleteButton.addEventListener("click", () => {
+	if (!state.showingTicket.id) return;
+	if (state.showingTicket.create) return closeTicketWindow(); // Don't delete if creating a new ticket.
+	deleteTicket(state.showingTicket.id);
+	closeTicketWindow();
+	render()
+});
+
+render();
