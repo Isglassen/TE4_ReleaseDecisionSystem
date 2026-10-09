@@ -40,8 +40,8 @@ else => RELEASE
 ## Features
 
 - [X] Search for ticket by id
-- [ ] Open ticket details. Possibly editing them.
-- [ ] Add tickets. (Save interface as editing?)
+- [X] Open ticket details. Possibly editing them.
+- [X] Add tickets. (Save interface as editing?)
 - [ ] Save tickets
 - [X] Filter tickets
 - [ ] Delete tickets

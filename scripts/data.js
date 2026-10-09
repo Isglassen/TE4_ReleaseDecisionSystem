@@ -16,10 +16,16 @@ const BASE_TICKETS = [
 ];
 
 export function loadTickets() {
+	const ticketData = JSON.parse(localStorage.getItem("tickets"));
+	if (ticketData) {
+		return ticketData.map(updateClassification);
+	}
 	return BASE_TICKETS.map(updateClassification);
 }
 
 export function saveTickets(tickets) {
-	console.warn("saveTickets Not implemented")
-	// Remember to strip classicfication property before saving, as it is derived from other properties and should not be stored.
+	const toSave = tickets.map(ticket => {
+		return { ...ticket, classification: undefined };
+	});
+	localStorage.setItem("tickets", JSON.stringify(toSave));
 }
