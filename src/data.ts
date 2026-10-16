@@ -1,4 +1,4 @@
-import { updateClassification } from "./logic";
+import { updateClassification } from "./logic.js";
 
 export type TicketStatus = "open" | "testing" | "done";
 

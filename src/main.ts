@@ -1,5 +1,5 @@
-import { loadTickets, saveTickets, Ticket } from "./data";
-import { ClassifiedTicket, isValidTicketClassification, isValidTicketStatus, releaseStats, TicketClassification, updateClassification } from "./logic";
+import { loadTickets, saveTickets, Ticket } from "./data.js";
+import { ClassifiedTicket, isValidTicketClassification, isValidTicketStatus, releaseStats, TicketClassification, updateClassification } from "./logic.js";
 
 // https://stackoverflow.com/questions/50851045/typescript-generics-return-instance-of-class-parameter
 // new (data: any) => T is something that makes instances of type T, which would be the class itself.
@@ -244,7 +244,7 @@ idSearchInput.addEventListener("input", (event) => {
 });
 
 filterSelect.addEventListener("input", (event) => {
-	if (!(event.target instanceof HTMLInputElement)) return;
+	if (!(event.target instanceof HTMLSelectElement)) return;
 	const value = event.target.value;
 
 	const isEmpty = (v: unknown): v is "" => v === "";

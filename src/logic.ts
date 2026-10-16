@@ -1,4 +1,4 @@
-import { Ticket, TicketStatus } from "./data";
+import { Ticket, TicketStatus } from "./data.js";
 
 export type TicketClassification = "DONE" | "RELEASE_BLOCKER" | "PRIORITY" | "UNASSIGNED" | "ACTIVE";
 

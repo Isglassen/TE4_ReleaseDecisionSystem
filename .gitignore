@@ -1,1 +1,4 @@
 node_modules/**
+
+# Out dir for ts
+scripts/**

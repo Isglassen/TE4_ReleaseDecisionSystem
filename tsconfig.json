@@ -11,5 +11,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"outDir": "./scripts",
 		"rewriteRelativeImportExtensions": true,
+		"rootDir": "src/",
 	},
 }
