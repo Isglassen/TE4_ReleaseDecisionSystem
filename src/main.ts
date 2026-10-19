@@ -18,6 +18,7 @@ const releaseDecision = getValidatedElement("#decision", HTMLElement);
 const idSearchInput = getValidatedElement("#idSearch", HTMLElement);
 const filterSelect = getValidatedElement("#filterStatus", HTMLSelectElement);
 const addTicketButton = getValidatedElement("#addTicket", HTMLButtonElement);
+const sortSelect = getValidatedElement("#sortBy", HTMLSelectElement);
 const formElements = {
 	modal: getValidatedElement("#ticketModal", HTMLElement),
 	close: getValidatedElement("#closeModal", HTMLElement),
@@ -36,9 +37,33 @@ const formElements = {
 	deleteButton: getValidatedElement("#ticketDelete", HTMLButtonElement),
 }
 
+type SortOption = "severity" | "id" | "hours" | "classification";
+
+const SORT_OPTIONS: SortOption[] = ["severity", "id", "hours", "classification"];
+function isValidSortOption(value: unknown): value is SortOption {
+	if (typeof value !== "string") return false;
+	return SORT_OPTIONS.includes(value as SortOption);
+}
+
+const classificationOrder: Record<TicketClassification, number> = {
+	"RELEASE_BLOCKER": 0,
+	"PRIORITY": 1,
+	"UNASSIGNED": 2,
+	"ACTIVE": 3,
+	"DONE": 4,
+}
+
+const sortMethods: Record<SortOption, (a: ClassifiedTicket, b: ClassifiedTicket) => number> = {
+	"id": (a, b) => a.id - b.id,
+	"severity": (a, b) => b.severity - a.severity,
+	"hours": (a, b) => b.remainingHours - a.remainingHours,
+	"classification": (a, b) => classificationOrder[a.classification] - classificationOrder[b.classification],
+}
+
 type State = {
 	search: number | null;
 	filter: TicketClassification | null;
+	sort: SortOption;
 	tickets: ClassifiedTicket[];
 	showingTicket: {
 		id: number | null;
@@ -49,6 +74,7 @@ type State = {
 const state: State = {
 	search: null,
 	filter: null,
+	sort: "severity",
 	tickets: loadTickets(),
 	showingTicket: {
 		id: null,
@@ -185,7 +211,7 @@ function render() {
 	const { search, filter } = state;
 
 	// Sort tickets by severity descending.
-	const tickets = state.tickets.toSorted((a, b) => b.severity - a.severity);
+	const tickets = state.tickets.toSorted(sortMethods[state.sort]);
 
 	// Get the highlighted ticket first if search is not null.
 	const displayTickets = search === null
@@ -246,6 +272,14 @@ filterSelect.addEventListener("input", (event) => {
 	render();
 });
 
+sortSelect.addEventListener("input", (event) => {
+	if (!(event.target instanceof HTMLSelectElement)) return;
+	const value = event.target.value as SortOption;
+	if (!isValidSortOption(value)) return; // Invalid value, ignore.
+
+	state.sort = value;
+	render();
+});
 
 formElements.close.addEventListener("click", () => {
 	closeTicketWindow();
