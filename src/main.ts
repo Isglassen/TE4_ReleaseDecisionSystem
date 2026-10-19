@@ -125,6 +125,9 @@ function displayTicket(ticket: Ticket | null = null) {
 	formElements.blockedInput.checked = ticket?.blocked ?? false;
 
 	formElements.saveButton.value = ticket === null ? "Create Ticket" : "Save Changes";
+	formElements.deleteButton.disabled = ticket === null;
+	if (ticket === null) formElements.deleteButton.classList.add("hidden");
+	else formElements.deleteButton.classList.remove("hidden");
 
 	updateFormError("");
 
