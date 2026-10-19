@@ -1,4 +1,4 @@
-import { updateClassification } from "./logic.js";
+import { isValidTicketStatus, updateClassification } from "./logic.js";
 
 export type TicketStatus = "open" | "testing" | "done";
 
@@ -28,13 +28,69 @@ const BASE_TICKETS: Ticket[] = [
 	{ id: 112, title: "Invoice mismatch", severity: 4, status: "testing", owner: null, remainingHours: 7, customerVip: true, blocked: false }
 ];
 
+// TODO: validateTicket function
+export function isValidTicket(ticket: unknown): ticket is Ticket {
+	if (typeof ticket !== "object" || ticket === null) return false;
+	if (!("id" in ticket)) return false;
+	const id = ticket.id;
+	if (typeof id !== "number") return false;
+
+	if (!("title" in ticket)) return false;
+	const title = ticket.title;
+	if (typeof title !== "string") return false;
+
+	if (!("severity" in ticket)) return false;
+	const severity = ticket.severity;
+	if (typeof severity !== "number") return false;
+
+	if (!("status" in ticket)) return false;
+	const status = ticket.status;
+	if (!isValidTicketStatus(status)) return false;
+
+	if (!("owner" in ticket)) return false;
+	const owner = ticket.owner;
+	if (owner !== null && typeof owner !== "string") return false;
+
+	if (!("remainingHours" in ticket)) return false;
+	const remainingHours = ticket.remainingHours;
+	if (typeof remainingHours !== "number") return false;
+
+	if (!("customerVip" in ticket)) return false;
+	const customerVip = ticket.customerVip;
+	if (typeof customerVip !== "boolean") return false;
+
+	if (!("blocked" in ticket)) return false;
+	const blocked = ticket.blocked;
+	if (typeof blocked !== "boolean") return false;
+
+	let _check: Ticket = {
+		id,
+		title,
+		severity,
+		status: status,
+		owner,
+		remainingHours,
+		customerVip,
+		blocked
+	};
+	return true;
+}
+
+export function isValidTicketArray(tickets: unknown): tickets is Ticket[] {
+	if (!Array.isArray(tickets)) return false;
+	return (tickets.every(isValidTicket));
+}
+
 export function loadTickets() {
 	const dataString = localStorage.getItem("tickets");
 	if (!dataString) {
 		return BASE_TICKETS.map((t) => updateClassification(t));
 	}
-	// FIXME: Currently no validation of localStorage data.
-	const ticketData = JSON.parse(dataString) as Ticket[] | null;
+	const ticketData = JSON.parse(dataString);
+	if (!isValidTicketArray(ticketData)) {
+		localStorage.removeItem("tickets");
+		return BASE_TICKETS.map((t) => updateClassification(t));
+	}
 	if (ticketData) {
 		return ticketData.map((t) => updateClassification(t));
 	}
@@ -43,6 +99,7 @@ export function loadTickets() {
 
 export function saveTickets(tickets: Ticket[]) {
 	const toSave = tickets.map(ticket => {
+		// WARNING: Typescript does not check this, but we don't want to save classification since it is derived.
 		return { ...ticket, classification: undefined };
 	});
 	localStorage.setItem("tickets", JSON.stringify(toSave));

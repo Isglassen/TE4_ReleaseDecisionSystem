@@ -149,33 +149,22 @@ function saveTicket() {
 	if (owner === "") owner = null; // Allow empty owner to be null.
 	if (remainingHours < 0) return updateFormError("Remaining hours cannot be negative.");
 
-	const ticket: ClassifiedTicket | undefined = state.showingTicket.create ?
-		{
-			id: state.showingTicket.id,
-			title: title,
-			severity: severity,
-			status: status,
-			owner: owner,
-			remainingHours: remainingHours,
-			customerVip: customerVip,
-			blocked: blocked,
-			classification: "ACTIVE", // Default classification, will be updated below.
-		}
-		: state.tickets.find(t => t.id === state.showingTicket.id);
+	const existingTicket = state.showingTicket.create ? {} : state.tickets.find(t => t.id === state.showingTicket.id);
+	if (!existingTicket) return updateFormError("ERROR: Ticket not found.");
 
-	if (!ticket) return updateFormError("ERROR: Ticket not found.");
-
-	if (!state.showingTicket.create) {
-		ticket.id = state.showingTicket.id;
-		ticket.title = title;
-		ticket.severity = severity;
-		ticket.status = status;
-		ticket.owner = owner;
-		ticket.remainingHours = remainingHours;
-		ticket.customerVip = customerVip;
-		ticket.blocked = blocked;
+	const newData: ClassifiedTicket = {
+		id: state.showingTicket.id,
+		title: title,
+		severity: severity,
+		status: status,
+		owner: owner,
+		remainingHours: remainingHours,
+		customerVip: customerVip,
+		blocked: blocked,
+		classification: "ACTIVE", // WARNING: Default classification, should be updated below.
 	}
 
+	const ticket: ClassifiedTicket = Object.assign(existingTicket, newData);
 	updateClassification(ticket, true);
 
 	if (state.showingTicket.create) {

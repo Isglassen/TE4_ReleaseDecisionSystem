@@ -6,7 +6,7 @@ export interface ClassifiedTicket extends Ticket {
 	classification: TicketClassification;
 }
 
-export function calssifyTicket(ticket: Ticket): TicketClassification {
+export function classifyTicket(ticket: Ticket): TicketClassification {
 	if (ticket.status === "done") return "DONE";
 	if (ticket.blocked && ticket.severity >= 4) return "RELEASE_BLOCKER";
 	if (ticket.severity >= 5) return "RELEASE_BLOCKER";
@@ -16,20 +16,22 @@ export function calssifyTicket(ticket: Ticket): TicketClassification {
 }
 
 export function updateClassification(ticket: Ticket, update = false): ClassifiedTicket {
-	// FIXME: A bit cheated here, but we want to turn the ticket object into a ClassifiedTicket in place.
-	const newTicket = (update ? ticket : { ...ticket }) as ClassifiedTicket;
-	newTicket.classification = calssifyTicket(newTicket);
-	return newTicket;
+	return Object.assign(
+		update ? ticket : { ...ticket },
+		{ classification: classifyTicket(ticket) }
+	);
 }
 
+const TICKET_STATUSES: TicketStatus[] = ["open", "testing", "done"];
 export function isValidTicketStatus(value: unknown): value is TicketStatus {
 	if (typeof value !== "string") return false;
-	return (["open", "testing", "done"] as TicketStatus[]).includes(value as TicketStatus);
+	return (TICKET_STATUSES.includes(value as TicketStatus));
 }
 
+const TICKET_CLASSIFICATIONS: TicketClassification[] = ["DONE", "RELEASE_BLOCKER", "PRIORITY", "UNASSIGNED", "ACTIVE"];
 export function isValidTicketClassification(value: unknown): value is TicketClassification {
 	if (typeof value !== "string") return false;
-	return (["DONE", "RELEASE_BLOCKER", "PRIORITY", "UNASSIGNED", "ACTIVE"] as TicketClassification[]).includes(value as TicketClassification);
+	return (TICKET_CLASSIFICATIONS.includes(value as TicketClassification));
 }
 
 export type ReleaseDecision = "RELEASE" | "BLOCK" | "HOLD";
