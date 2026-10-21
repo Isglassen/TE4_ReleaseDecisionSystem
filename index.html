@@ -9,14 +9,20 @@
 	</head>
 	<body>
 		<h1>Release Decision System</h1>
-		<section>
+		<section class="info">
 			<h2>Release Decision</h2>
-			<p>Blocking tickets: <span id="count_RELEASE_BLOCKER">0</span></p>
-			<p>Priority tickets: <span id="count_PRIORITY">0</span></p>
-			<p>Unassigned tickets: <span id="count_UNASSIGNED"></span></p>
-			<p>Work hours left: <span id="workHours"></span></p>
-			<p>Release decision: <span id="decision"></span></p>
+			<span>Blocking tickets: </span>
+			<span class="right-text" id="count_RELEASE_BLOCKER">0</span>
+			<span>Priority tickets: </span>
+			<span class="right-text" id="count_PRIORITY">0</span>
+			<span>Unassigned tickets: </span>
+			<span class="right-text" id="count_UNASSIGNED"></span>
+			<span>Work hours left: </span>
+			<span class="right-text" id="workHours"></span>
+			<span>Release decision: </span>
+			<span class="right-text" id="decision"></span>
 		</section>
+		<div class="seperator"></div>
 		<section class="grow">
 			<h2>Ticket List</h2>
 			<label for="idSearch">Search for ID: <input type="text" id="idSearch"></label>
@@ -46,21 +52,25 @@
 				<span class="close" id="closeModal">&times;</span>
 				<h2 id="ticketModalTitle">Edit Ticket</h2>
 				<form id="ticketEdit">
-					<label for="ticketId">Ticket ID: <input type="text" id="ticketId" readonly disabled size="4"></label>
-					<label for="ticketTitle">Title: <input type="text" id="ticketTitle"></label>
-					<label for="ticketSeverity">Severity: <input type="number" id="ticketSeverity" min="1" max="5"></label>
-					<label for="ticketStatus">Status:
-						<select id="ticketStatus">
-							<option value="open">Open</option>
-							<option value="testing">Testing</option>
-							<option value="done">Done</option>
-						</select>
-					</label>
-					<label for="ticketOwner">Owner: <input type="text" id="ticketOwner"></label>
-					<label for="ticektHours">Remaining Hours: <input type="number" id="ticketHours" min="0" size="3"></label>
-					<label for="ticketCustomerVip"><input type="checkbox" id="ticketCustomerVip"> VIP Customer</label>
-					<label for="ticketBlocked"><input type="checkbox" id="ticketBlocked"> Blocked</label>
-					<input id="ticketSave" type="submit" value="Save Changes">
+					<label for="ticketId">Ticket ID: </label>
+					<input type="text" id="ticketId" readonly disabled size="4">
+					<label for="ticketTitle">Title: </label>
+					<input type="text" id="ticketTitle">
+					<label for="ticketSeverity">Severity: </label>
+					<input type="number" id="ticketSeverity" min="1" max="5" size="3">
+					<label for="ticketStatus">Status: </label>
+					<select id="ticketStatus">
+						<option value="open">Open</option>
+						<option value="testing">Testing</option>
+						<option value="done">Done</option>
+					</select>
+					<label for="ticketOwner">Owner: </label>
+					<input type="text" id="ticketOwner">
+					<label for="ticektHours">Remaining Hours: </label>
+					<input type="number" id="ticketHours" min="0" size="5">
+					<label for="ticketCustomerVip" class="span"><input type="checkbox" id="ticketCustomerVip"> VIP Customer</label>
+					<label for="ticketBlocked" class="span"><input type="checkbox" id="ticketBlocked"> Blocked</label>
+					<input id="ticketSave" type="submit" value="Save Changes" class="span">
 					<p id="ticketError" class="error"></p>
 				</form>
 				<button id="ticketDelete">Delete Ticket</button>
