@@ -137,7 +137,8 @@ function closeTicketWindow() {
 function displayTicket(ticket: Ticket | null = null) {
 	if (state.showingTicket.id !== null) return; // Should not override existing ticket.
 
-	const id = ticket?.id ?? Math.max(...state.tickets.map(t => t.id)) + 1;
+	const maxExisting = state.tickets.length > 0 ? Math.max(...state.tickets.map(t => t.id)) : 0;
+	const id = ticket?.id ?? maxExisting + 1;
 
 	formElements.modal.classList.remove("hidden");
 	formElements.modalTitle.textContent = ticket === null ? "Create Ticket" : `Edit Ticket #${ticket.id}`;
