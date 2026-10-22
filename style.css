@@ -79,6 +79,11 @@ h1, h2 {
 	background-color: #f0f8ff;
 	border-color: #1e90ff;
 }
+.ticket.dimmed {
+	background-color: #eee;
+	border-color: #eee;
+	color: #777;
+}
 
 .modal {
 	position: fixed;

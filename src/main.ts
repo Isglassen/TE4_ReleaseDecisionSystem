@@ -61,7 +61,7 @@ const sortMethods: Record<SortOption, (a: ClassifiedTicket, b: ClassifiedTicket)
 }
 
 type State = {
-	search: number | null;
+	search: number | string | null;
 	filter: TicketClassification | null;
 	sort: SortOption;
 	tickets: ClassifiedTicket[];
@@ -82,10 +82,32 @@ const state: State = {
 	}
 }
 
-function applySearch<T extends Ticket>(tickets: T[], id: number): T[] {
-	// Matching ticket becomes 1, non matching becomes 0. Sort descending so matching ticket is first.
-	const matchFirst = tickets.toSorted((a, b) => +(b.id === id) - +(a.id === id))
-	return matchFirst;
+// Regarding the return type. The tickets are sorted so that one matching the id is first, and ones not matching text are last.
+// normalFrom is the index of the first not-highlighted ticket. unfoundFrom is the index of the first ticket that does not match the search text.
+// If no ticket matches then this will be higher then the length of the tickets array.
+// TODO: Combine both sorts to run together?
+function applySearch<T extends Ticket>(tickets: T[], search: number | string | null): { tickets: T[], normalFrom: number, unfoundFrom: number } {
+	if (search === null) return { tickets, normalFrom: 0, unfoundFrom: tickets.length };
+	if (typeof search === "number") {
+		// Treat the match as one and others as 0, and sort them.
+		const matchFirst = tickets.toSorted((a, b) => +(b.id === search) - +(a.id === search))
+		const normalFrom = matchFirst[0].id === search ? 1 : 0;
+		return { tickets: matchFirst, normalFrom, unfoundFrom: normalFrom };
+	}
+	// TODO: Would be nice to not have to check twice.
+	const matchFirst = tickets.toSorted((a, b) => +(matchesSearch(b, search)) - +(matchesSearch(a, search)));
+	const unfoundFrom = matchFirst.findIndex(t => !matchesSearch(t, search));
+	return { tickets: matchFirst, normalFrom: 0, unfoundFrom: unfoundFrom === -1 ? matchFirst.length : unfoundFrom };
+}
+
+function matchesSearch(ticket: Ticket, search: string): boolean {
+	if (!search) return true;
+	if (ticket.title.toLowerCase().includes(search.toLowerCase())) return true;
+	if (ticket.owner && ticket.owner.toLowerCase().includes(search.toLowerCase())) return true;
+	if (ticket.status.toLowerCase().includes(search.toLowerCase())) return true;
+	if (ticket.id.toString().includes(search)) return true;
+	if (`#${ticket.id}`.startsWith(search)) return true;
+	return false;
 }
 
 function applyFilter<T extends ClassifiedTicket>(tickets: T[], filter: TicketClassification | null): T[] {
@@ -93,7 +115,7 @@ function applyFilter<T extends ClassifiedTicket>(tickets: T[], filter: TicketCla
 	return tickets.filter(ticket => ticket.classification === filter);
 }
 
-function ticketElement(ticket: ClassifiedTicket, highlight = false) {
+function ticketElement(ticket: ClassifiedTicket, className = "") {
 	const article = document.createElement("article");
 	const idSpan = article.appendChild(document.createElement("span"));
 	const titleSpan = article.appendChild(document.createElement("span"));
@@ -101,10 +123,9 @@ function ticketElement(ticket: ClassifiedTicket, highlight = false) {
 	const timeSpan = article.appendChild(document.createElement("span"));
 	const classificationSpan = article.appendChild(document.createElement("span"));
 
-	article.classList.add("ticket");
+	article.className = "ticket " + className;
 	article.id = `ticket-${ticket.id}`;
 	article.dataset.id = `${ticket.id}`;
-	if (highlight) article.classList.add("highlight");
 
 	idSpan.classList.add("ticket-id");
 	idSpan.textContent = `#${ticket.id}`;
@@ -211,17 +232,21 @@ function render() {
 
 	const { search, filter } = state;
 
-	// Sort tickets by severity descending.
 	const tickets = state.tickets.toSorted(sortMethods[state.sort]);
 
-	// Get the highlighted ticket first if search is not null.
-	const displayTickets = search === null
-		? applyFilter(tickets, filter)
-		: applySearch(applyFilter(tickets, filter), search);
+	const filteredTickets = typeof search !== "number" ? applyFilter(tickets, filter) : tickets;
 
-	displayTickets.forEach(ticket => {
-		// Display ticket, if ticket id is the searched one highlight it.
-		ticketList.appendChild(ticketElement(ticket, ticket.id === search));
+	const { tickets: displayTickets, normalFrom, unfoundFrom } = applySearch(filteredTickets, search);
+
+	displayTickets.forEach((ticket, index) => {
+		let className = "";
+		if (index < normalFrom) {
+			className = "highlight";
+		}
+		if (index >= unfoundFrom) {
+			className = "dimmed";
+		}
+		ticketList.appendChild(ticketElement(ticket, className));
 	});
 
 	const stats = releaseStats(tickets);
@@ -244,12 +269,19 @@ function deleteTicket(id: number) {
 	saveTickets(state.tickets);
 }
 
-// This function handles both strings, numbers and null.
-// Strings get converted to numbers, or null if NaN.
-function updateSearch(value: string | number | null) {
-	let num: number | null = value !== null ? parseInt(`${value}`, 10) : null;
-	if (num === null || isNaN(num)) num = null;
-	state.search = num;
+function updateSearch(value: string) {
+	if (!value) {
+		state.search = null;
+		return;
+	}
+
+	const id = state.tickets.find(t => "#" + t.id === value)?.id;
+	if (id) {
+		state.search = id;
+		return;
+	}
+
+	state.search = value;
 }
 
 function updateFilter(value: TicketClassification | "" | null) {
