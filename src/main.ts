@@ -61,7 +61,7 @@ const sortMethods: Record<SortOption, (a: ClassifiedTicket, b: ClassifiedTicket)
 }
 
 type State = {
-	search: number | string | null;
+	search: string | null;
 	filter: TicketClassification | null;
 	sort: SortOption;
 	tickets: ClassifiedTicket[];
@@ -82,22 +82,59 @@ const state: State = {
 	}
 }
 
+// Returns a new array with the items sorted into buckets based on the provided bucket functions.
+// Each bucket function should return true for items that belong in that bucket.
+// On item will be placed in the first matching bucket only.
+// Items that do not match any bucket will be placed at the end of the array.
+// The buckets should be in the order they should be sorted.
+// Also returns the index of the last item of each bucket, so that the caller can know where the buckets end.
+function bucketSort<T>(arr: T[], buckets: ((item: T) => boolean)[]): { arr: T[], bucketEnds: number[] } {
+	const bucketed: T[][] = buckets.map(() => []);
+	const unfound: T[] = [];
+	for (const item of arr) {
+		let bucketedFlag = false;
+		for (let i = 0; i < buckets.length; i++) {
+			if (buckets[i](item)) {
+				bucketed[i].push(item);
+				bucketedFlag = true;
+				break;
+			}
+		}
+		if (!bucketedFlag) {
+			unfound.push(item);
+		}
+	}
+	let bucketEnds: number[] = [];
+	for (let i = 0; i < bucketed.length; i++) {
+		if (i === 0) {
+			bucketEnds.push(bucketed[i].length - 1);
+			continue;
+		}
+		bucketEnds.push(bucketEnds[i - 1] + bucketed[i].length);
+	}
+	return { arr: bucketed.flat().concat(unfound), bucketEnds };
+}
+
 // Regarding the return type. The tickets are sorted so that one matching the id is first, and ones not matching text are last.
 // normalFrom is the index of the first not-highlighted ticket. unfoundFrom is the index of the first ticket that does not match the search text.
 // If no ticket matches then this will be higher then the length of the tickets array.
-// TODO: Combine both sorts to run together?
-function applySearch<T extends Ticket>(tickets: T[], search: number | string | null): { tickets: T[], normalFrom: number, unfoundFrom: number } {
+function applySearch<T extends Ticket>(tickets: T[], search: string | null): { tickets: T[], normalFrom: number, unfoundFrom: number } {
 	if (search === null) return { tickets, normalFrom: 0, unfoundFrom: tickets.length };
-	if (typeof search === "number") {
-		// Treat the match as one and others as 0, and sort them.
-		const matchFirst = tickets.toSorted((a, b) => +(b.id === search) - +(a.id === search))
-		const normalFrom = matchFirst[0].id === search ? 1 : 0;
-		return { tickets: matchFirst, normalFrom, unfoundFrom: normalFrom };
-	}
-	// TODO: Would be nice to not have to check twice.
-	const matchFirst = tickets.toSorted((a, b) => +(matchesSearch(b, search)) - +(matchesSearch(a, search)));
-	const unfoundFrom = matchFirst.findIndex(t => !matchesSearch(t, search));
-	return { tickets: matchFirst, normalFrom: 0, unfoundFrom: unfoundFrom === -1 ? matchFirst.length : unfoundFrom };
+	const exactBucket = (t: T) => exactMatchSearch(t, search);
+	const matchBucket = (t: T) => matchesSearch(t, search);
+	const { arr: sortedTickets, bucketEnds } = bucketSort(tickets, [exactBucket, matchBucket]);
+	const normalFrom = bucketEnds[0] + 1; // First index of the second bucket (matchesSearch)
+	const unfoundFrom = bucketEnds[1] + 1; // First index of the third bucket (not matching)
+	return { tickets: sortedTickets, normalFrom, unfoundFrom };
+}
+
+function exactMatchSearch(ticket: Ticket, search: string): boolean {
+	if (ticket.id.toString() === search) return true;
+	if (`#${ticket.id}` === search) return true;
+	if (ticket.title.toLowerCase() === search.toLowerCase()) return true;
+	if (ticket.owner && ticket.owner.toLowerCase() === search.toLowerCase()) return true;
+	if (ticket.status.toLowerCase() === search.toLowerCase()) return true;
+	return false;
 }
 
 function matchesSearch(ticket: Ticket, search: string): boolean {
@@ -272,12 +309,6 @@ function deleteTicket(id: number) {
 function updateSearch(value: string) {
 	if (!value) {
 		state.search = null;
-		return;
-	}
-
-	const id = state.tickets.find(t => "#" + t.id === value)?.id;
-	if (id) {
-		state.search = id;
 		return;
 	}
 
